@@ -6,6 +6,7 @@
 #include "inputclass.h"
 #include "graphicsclass.h"
 #include "WinForm.h"
+#include "ObjectData.h"
 
 
 
@@ -20,16 +21,19 @@ public:
 	void Shutdown();
 	void Run();
 	HINSTANCE GetHInst();
-	void CreateDXWindow();
-	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
-	void SetupForm();
+	void CreateDXWindow();	
+	void SetupForm(HWND hwnd);
 
 private:
 	bool Frame();
 	void InitializeWindowsWithDebugWindow(int&, int&);
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
-	
+	void btLoadClick();
+public:
+	LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	LRESULT MessageHandler(HWND, UINT, WPARAM, LPARAM);
+	LRESULT WndProcDX(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 private:
 	std::wstring m_applicationName;
 	HINSTANCE m_hinstance;
@@ -39,20 +43,20 @@ private:
 	WinForm* m_form;
 	InputClass* m_Input;
 	GraphicsClass* m_Graphics;
-
+	ObjectData* m_objData;
 
 
 };
 /////////////////////////
 // FUNCTION PROTOTYPES //
 /////////////////////////
-static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-static LRESULT CALLBACK WndProcDX(HWND, UINT, WPARAM, LPARAM);
+//static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+//static LRESULT CALLBACK WndProcDX(HWND, UINT, WPARAM, LPARAM);
 
 
 /////////////
 // GLOBALS //
 /////////////
-extern SystemClass* g_ApplicationHandle;
+//extern SystemClass* g_ApplicationHandle;
 
 

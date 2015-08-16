@@ -9,8 +9,10 @@ public:
 	WinForm(HWND hwnd);
 	~WinForm();
 
-	void CreateButton(std::string name, std::string text, int x, int y);
+	void CreateButton(int id, std::string name, std::string text, int x, int y);
 	void CreateLabTextBox(std::string name, std::string labeltext, int x, int y, int width);
+	void CreateDDL(int id, std::string name, std::string text, int x, int y);
+	HWND GetWHnd(int id);
 private:
 	HWND m_hwnd;
 	int m_nextid;

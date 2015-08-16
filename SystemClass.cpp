@@ -5,8 +5,27 @@
 /////////////
 // GLOBALS //
 /////////////
-SystemClass* g_ApplicationHandle = 0;
+//namespace {
+	SystemClass* g_ApplicationHandle = 0;
+//}
 
+	const int IDEV_LOAD = 1000;
+	const int IDEV_DDL_TAC = 1001;
+
+LRESULT CALLBACK CBWndProc(HWND hwnd,  UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (g_ApplicationHandle) {
+		return g_ApplicationHandle->WndProc(hwnd, msg, wParam, lParam);
+	} else {
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+}
+LRESULT CALLBACK CBWndProcDX(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (g_ApplicationHandle) {
+		return g_ApplicationHandle->WndProcDX(hwnd, msg, wParam, lParam);
+	} else {
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+}
 //const bool FULL_SCREEN = false;
 
 SystemClass::SystemClass() {
@@ -133,7 +152,7 @@ bool SystemClass::Frame() {
 	return true;
 }
 
-LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
+LRESULT SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
 	switch (umsg) {
 		// Check if a key has been pressed on the keyboard.
 	case WM_KEYDOWN:
@@ -159,9 +178,10 @@ LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam
 	}
 }
 
-void SystemClass::SetupForm() {
-	m_form = new WinForm(m_hwnd);
-	m_form->CreateButton("btLoad", "Loadx", 50, 50);
+void SystemClass::SetupForm(HWND hwnd) {
+	m_form = new WinForm(hwnd);
+	m_form->CreateButton(IDEV_LOAD, "btLoad", "Loadx", 50, 50);
+	m_form->CreateDDL(IDEV_DDL_TAC, "ddlTac","Tac", 50, 100);
 }
 
 void SystemClass::InitializeWindowsWithDebugWindow(int& screenWidth, int& screenHeight) {
@@ -191,7 +211,7 @@ void SystemClass::InitializeWindowsWithDebugWindow(int& screenWidth, int& screen
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = WndProc;
+	wcex.lpfnWndProc = CBWndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = m_hinstance;
@@ -265,7 +285,7 @@ void SystemClass::InitializeWindowsWithDebugWindow(int& screenWidth, int& screen
 	ShowWindow(m_hwnd, SW_SHOW);
 	SetForegroundWindow(m_hwnd);
 	SetFocus(m_hwnd);
-	SetupForm();
+	//SetupForm();
 	// Hide the mouse cursor.
 	//ShowCursor(false);
 
@@ -288,7 +308,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight) {
 
 	// Setup the windows class with default settings.
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	wc.lpfnWndProc = WndProc;
+	wc.lpfnWndProc = CBWndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = m_hinstance;
@@ -396,7 +416,7 @@ void SystemClass::CreateDXWindow() {
 
 	// Setup the windows class with default settings.
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	wc.lpfnWndProc = WndProcDX;
+	wc.lpfnWndProc = CBWndProcDX;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = m_hinstance;
@@ -491,7 +511,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	return (INT_PTR)FALSE;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT SystemClass::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
@@ -507,10 +527,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDM_ABOUT:
-			DialogBox(g_ApplicationHandle->GetHInst(), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			DialogBox(m_hinstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		case ID_CMDS_NEWDX:
-			g_ApplicationHandle->CreateDXWindow();
+			CreateDXWindow();
+			break;
+
+		case IDEV_LOAD:
+			btLoadClick();
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -526,7 +550,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CREATE:
 		//btLoad = CreateWindowA ("BUTTON", "Load", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 50, 50, 100, 32, hWnd, NULL, ApplicationHandle->GetHInst(), NULL);
-		//ApplicationHandle->SetupForm();
+		SetupForm(hWnd);
+		
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -539,7 +564,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT CALLBACK WndProcDX(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam) {
+LRESULT SystemClass::WndProcDX(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam) {
 	switch (umessage) {
 		// Check if the window is being destroyed.
 	case WM_DESTROY:
@@ -558,7 +583,14 @@ LRESULT CALLBACK WndProcDX(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lpara
 	// All other messages pass to the message handler in the system class.
 	default:
 	{
-		return g_ApplicationHandle->MessageHandler(hwnd, umessage, wparam, lparam);
+		return MessageHandler(hwnd, umessage, wparam, lparam);
 	}
 	}
+}
+void SystemClass::btLoadClick() {
+	string basename = "C:\\\games\\falcon4\\terrdata\\objects\\KoreaObj";
+	string homepath = "C:\\\games\\falcon4";
+	HWND listbox = m_form->GetWHnd(IDEV_DDL_TAC);
+	m_objData = new ObjectData();
+	m_objData->LoadData(homepath, basename, listbox);
 }
