@@ -588,8 +588,8 @@ LRESULT SystemClass::WndProcDX(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM l
 	}
 }
 void SystemClass::btLoadClick() {
-	string basename = "C:\\\games\\falcon4\\terrdata\\objects\\KoreaObj";
-	string homepath = "C:\\\games\\falcon4";
+	string basename = "d:\\\games\\falcon4\\terrdata\\objects\\KoreaObj";
+	string homepath = "d:\\\games\\falcon4";
 	HWND listbox = m_form->GetWHnd(IDEV_DDL_TAC);
 	m_objData = new ObjectData();
 	m_objData->LoadData(homepath, basename, listbox);
